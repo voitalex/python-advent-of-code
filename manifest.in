@@ -1,0 +1,7 @@
+
+include requirements.txt
+
+recursive-include advent_of_code_python/data *.txt
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
