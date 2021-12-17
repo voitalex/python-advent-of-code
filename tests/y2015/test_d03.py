@@ -2,7 +2,7 @@
 
 import pytest
 from advent_of_code.y2015.d03 import first_task, second_task
-from tests.common import Task
+from tests.consts import Task
 
 
 @pytest.mark.y2015d03
