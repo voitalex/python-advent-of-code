@@ -1,8 +1,12 @@
 """ Day 03: Binary Diagnostic """
 
+import typing
 from collections import defaultdict, Counter
-from typing import Iterable, Tuple, Dict
+from typing import Iterable, Tuple, Dict, DefaultDict
 from advent_of_code.common import first, last
+
+
+FrequencyCounter = typing.Counter[str]
 
 
 def bin2dec(value: Iterable[str]) -> int:
@@ -10,10 +14,10 @@ def bin2dec(value: Iterable[str]) -> int:
     return int(''.join(value), 2)
 
 
-def _char_frequency(values: Iterable[str]) -> Dict[int, Counter]:
+def _char_frequency(values: Iterable[str]) -> Dict[int, FrequencyCounter]:
     """ Возвращает распределение символов для каждой символьной позиции в строках """
 
-    result = defaultdict(Counter)
+    result: DefaultDict[int, FrequencyCounter] = defaultdict(Counter)
     for value in values:
         for index, char in enumerate(value):
             result[index].update(char)
@@ -68,7 +72,7 @@ def first_task(strings: Iterable[str]):
     not binary.)
     """
 
-    frequency: Dict[int, Counter] = _char_frequency(strings)
+    frequency: Dict[int, FrequencyCounter] = _char_frequency(strings)
 
     # Counter.most_common возвращает результат в виде списка кортежей, упорядоченных по частоте упоминания.
     # Например:
@@ -150,11 +154,11 @@ def second_task(strings: Iterable[str]) -> int:
     def _recursive_search(values: Tuple[str, ...], keep_most: bool, index: int = 0) -> str:
 
         if len(values) == 1:
-            return first(values)
+            return first(values) or ''
 
         frequency = _char_frequency(values)
-        most_common_char, most_common_value = first(frequency[index].most_common())
-        least_common_char, least_common_value = last(frequency[index].most_common())
+        most_common_char, most_common_value = first(frequency[index].most_common()) or ('', 0)
+        least_common_char, least_common_value = last(frequency[index].most_common()) or ('', 0)
 
         # Выбор символа для фильтрации
         if most_common_value != least_common_value:

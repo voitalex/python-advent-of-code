@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from itertools import chain
-from typing import Iterable, List, FrozenSet, Dict, Tuple
+from typing import Iterable, List, FrozenSet, Dict, Tuple, Set, DefaultDict
 from advent_of_code.common import first, chunked, last
 
 
@@ -43,19 +43,16 @@ class Board:
     def _create_grid(lines: Iterable[str]) -> Tuple[Dict[int, Tuple[int, int]], List[int], List[int]]:
         """ Создание игрового поля """
 
-        grid = {}
-        row_sums = defaultdict(int)
-        column_sums = defaultdict(int)
+        grid: Dict[int, Tuple[int, int]] = {}
+        row_sums: DefaultDict[int, int] = defaultdict(int)
+        column_sums: DefaultDict[int, int] = defaultdict(int)
         for row, line in enumerate(lines):
             for column, value in enumerate(int(x) for x in line.split(' ') if x):
                 grid[value] = (row, column)
                 row_sums[row] += value
                 column_sums[column] += value
 
-        row_sums = [row_sums[key] for key in sorted(row_sums)]
-        column_sums = [column_sums[key] for key in sorted(column_sums)]
-
-        return grid, row_sums, column_sums
+        return grid, [row_sums[x] for x in sorted(row_sums)], [column_sums[x] for x in sorted(column_sums)]
 
 
 class BoardSet:
@@ -65,7 +62,7 @@ class BoardSet:
 
     def __init__(self, line_size: int, numbers: Iterable[str]) -> None:
         self._boards: List[Board] = [Board(index, values) for index, values in enumerate(chunked(line_size, numbers))]
-        self._winner_boards = set()
+        self._winner_boards: Set[int] = set()
 
     def available_numbers(self, index: int) -> FrozenSet[int]:
         """ Возвращает множество оставшихся номером на указанном игровом поле """
@@ -162,7 +159,7 @@ def first_task(strings: Iterable[str]):
     """
 
     strings = (string for string in strings if string and string.strip())
-    raw_numbers = first(strings)
+    raw_numbers = first(strings) or ''
     numbers = [int(value) for value in raw_numbers.split(',')]
     board_set = BoardSet(line_size=5, numbers=strings)
 
@@ -191,7 +188,7 @@ def second_task(strings: Iterable[str]) -> int:
 
     strings = (string for string in strings if string and string.strip())
     raw_numbers = first(strings)
-    numbers = [int(value) for value in raw_numbers.split(',')]
+    numbers = [int(value) for value in (raw_numbers or '').split(',')]
     board_set = BoardSet(line_size=5, numbers=strings)
 
     winning_score = 0
