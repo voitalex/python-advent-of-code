@@ -1,8 +1,8 @@
 """ Day 5: Doesn't He Have Intern-Elves For This? """
 
 import pytest
-from advent_of_code.y2015.d05 import first_task, second_task
-from tests.consts import Task
+from advent_of_code.common import Task
+from advent_of_code.problems.y2015.d05 import first_task, second_task
 
 
 @pytest.mark.y2015d05

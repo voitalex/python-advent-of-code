@@ -1,9 +1,13 @@
 """ Day 1: Not Quite Lisp """
 
-
+from pathlib import Path
 import pytest
-from advent_of_code.y2015.d01 import first_task, second_task
-from tests.consts import Task
+from advent_of_code.common import Task
+from advent_of_code.problems.y2015.d01 import first_task, second_task
+
+
+# Полный путь до каталога с тестовыми данными
+BASE_PATH = Path(__file__).parent.parent
 
 
 @pytest.mark.y2015d01

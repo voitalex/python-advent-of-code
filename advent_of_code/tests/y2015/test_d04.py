@@ -1,7 +1,7 @@
 """ Day 4: The Ideal Stocking Stuffer """
 
 import pytest
-from advent_of_code.y2015.d04 import first_task, second_task
+from advent_of_code.problems.y2015.d04 import first_task, second_task
 
 
 @pytest.mark.y2015d04
