@@ -13,10 +13,10 @@ each present: the area of the smallest side.
 
 For example:
 
-- A present with dimensions 2x3x4 requires 2*6 + 2*12 + 2*8 = 52 square feet of wrapping paper
-  plus 6 square feet of slack, for a total of 58 square feet.
-- A present with dimensions 1x1x10 requires 2*1 + 2*10 + 2*10 = 42 square feet of wrapping paper
-  plus 1 square foot of slack, for a total of 43 square feet.
+  * A present with dimensions 2x3x4 requires 2*6 + 2*12 + 2*8 = 52 square feet of wrapping paper
+    plus 6 square feet of slack, for a total of 58 square feet.
+  * A present with dimensions 1x1x10 requires 2*1 + 2*10 + 2*10 = 42 square feet of wrapping paper
+    plus 1 square foot of slack, for a total of 43 square feet.
 
 All numbers in the elves' list are in feet. How many total square feet of wrapping paper
 should they order?
@@ -58,13 +58,14 @@ def _parse_box_dimensions(line: str) -> BoxDimensions:
     """ Возвращает размеры коробки из строкового представления """
 
     dims = [int(dim) for dim in line.strip().split('x')]
-    return BoxDimensions(length=dims[0], width=dims[1], height=dims[2])
+    return BoxDimensions(*dims)
 
 
 def first_task(boxes_dimensions: Iterable[str]) -> int:
     """ Решение первой задачи """
 
     def paper_for_box(dims: BoxDimensions) -> int:
+        """ Возвращает кол-во упаковочной бумаги для одной коробки """
         squares = [dims.length * dims.width, dims.length * dims.height, dims.width * dims.height]
         return 2 * sum(squares) + min(squares)
 
@@ -75,6 +76,7 @@ def second_task(boxes_dimensions: Iterable[str]) -> int:
     """ Решение второй задачи """
 
     def ribbon_for_box(dims: BoxDimensions) -> int:
+        """ Возвращает кол-во упаковочной ленты для одной коробки """
         present_ribbon = 2 * min(dims.length + dims.width, dims.length + dims.height, dims.width + dims.height)
         bow_ribbon = dims.length * dims.height * dims.width
         return present_ribbon + bow_ribbon
