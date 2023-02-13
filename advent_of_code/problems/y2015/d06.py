@@ -49,29 +49,99 @@ For example:
 """
 
 import array
+import itertools
 import re
 from dataclasses import dataclass
-from typing import Iterable, Iterator
+from enum import unique, Enum, IntEnum
+from typing import Iterable, Iterator, Callable, Optional
 
 # Максимальный размер гирлянды с лампочками
 MAX_GRID_SIZE = 1000
 
 
+@unique
+class Action(Enum):
+    """ Действие с лампочкой """
+    on = 'on'
+    off = 'off'
+    toggle = 'toggle'
+
+
+@dataclass(frozen=True)
+class Point:
+    """ Координата на плоскости """
+    x: int
+    y: int
+
+
+@dataclass(frozen=True)
+class Range:
+    """ Диапазон точек на плоскости """
+
+    top: Point
+    bottom: Point
+
+    def __iter__(self) -> Iterator[Point]:
+        """ Возвращает точки из диапазона точек """
+        for y in range(self.top.y, self.bottom.y + 1):
+            for x in range(self.top.x, self.bottom.x + 1):
+                yield Point(x, y)
+
+
 @dataclass(frozen=True)
 class Command:
-    """ Описание команды на включение лампочек """
-    action: str
-    top_x: int
-    top_y: int
-    bottom_x: int
-    bottom_y: int
+    """ Входная команда на изменение состояния лампочек """
+    action: Action
+    range: Range
 
 
 @dataclass(frozen=True)
-class Instruction:
-    """ Описание """
-    action: str
-    offset: int
+class Light:
+    """ Лампочка """
+    brightness: int
+    location: Point
+
+
+class Garland:
+    """ Гирлянда из лампочек """
+
+    def __init__(self, grid_size: int, def_brightness: int = 0) -> None:
+        self.grid_size: int = grid_size
+        self.garland_range: Range = Range(top=Point(0, 0), bottom=Point(grid_size - 1, grid_size - 1))
+        self.garland: array.array = array.array('i', itertools.repeat(def_brightness, grid_size * grid_size))
+
+    def _get_light_brightness(self, point: Point) -> int:
+        """ Возвращает состояние (яркость) лампочки исходя из двумерных координат """
+        return self.garland[self._calc_offset(point)]
+
+    def _calc_offset(self, point: Point) -> int:
+        """ Возвращает положение лампочки исходя из двумерных координат """
+        return point.y * self.grid_size + point.x
+
+    def _set_light_brightness(self, point: Point, value: int) -> None:
+        """ Обновляет состояние лампочки """
+        self.garland[self._calc_offset(point)] = value
+
+    def apply(self, cmd: Command, calculate_light_brightness: Callable[[Action, Light], int]) -> None:
+        """ Применение команды """
+        for light in self.iterate(cmd.range):
+            self._set_light_brightness(
+                point=light.location,
+                value=calculate_light_brightness(cmd.action, light),
+            )
+
+    def iterate(self, range: Optional[Range] = None) -> Iterable[Light]:
+        """ Возвращает последовательность лампочек в указанном диапазоне """
+        range = range or self.garland_range
+        for point in range:
+            yield Light(
+                brightness=self._get_light_brightness(point),
+                location=point,
+            )
+
+    def count(self, brightness: int) -> int:
+        """ Возвращает количество лампочек с указанной яркостью """
+        return len([x for x in self.garland if x == brightness])
 
 
 def _parse_input(commands: Iterable[str]) -> Iterator[Command]:
@@ -81,49 +151,60 @@ def _parse_input(commands: Iterable[str]) -> Iterator[Command]:
     for str_command in commands:
         if res := re.search(template, str_command):
             yield Command(
-                action=res.group(1),
-                top_x=int(res.group(2)),
-                top_y=int(res.group(3)),
-                bottom_x=int(res.group(4)),
-                bottom_y=int(res.group(5)),
+                action=Action(res.group(1)),
+                range=Range(
+                    top=Point(int(res.group(2)), int(res.group(3))),
+                    bottom=Point(int(res.group(4)), int(res.group(5))),
+                )
             )
-
-
-def _to_instructions(cmd: Command) -> Iterator[Instruction]:
-    for y in range(cmd.top_y, cmd.bottom_y + 1):
-        for x in range(cmd.top_x, cmd.bottom_x + 1):
-            yield Instruction(action=cmd.action, offset=y * MAX_GRID_SIZE + x)
 
 
 def first_task(commands: Iterable[str]) -> int:
     """ Решение первой задачи """
 
-    lights = array.array('b', (0 for _ in range(MAX_GRID_SIZE * MAX_GRID_SIZE)))
+    @unique
+    class Light(IntEnum):
+        """ Дискретные значения яркости лампочки """
+        off = 0
+        on = 1
 
-    def apply_instruction(instruction: Instruction) -> None:
-        if instruction.action == 'toggle':
-            lights[instruction.offset] = abs(1 - lights[instruction.offset])
-        else:
-            lights[instruction.offset] = 1 if instruction.action == "on" else 0
+    def calculate_light_brightness(action: Action, light: Light) -> int:
+        """ Расчет яркости лампочки """
+        return {
+            action.on: Light.on.value,
+            action.off: Light.off.value,
+            action.toggle: abs(Light.on.value - light.brightness),
+        }[action]
+
+    garland = Garland(MAX_GRID_SIZE)
 
     for command in _parse_input(commands):
-        for instruction in _to_instructions(command):
-            apply_instruction(instruction)
+        garland.apply(command, calculate_light_brightness)
 
-    return sum(lights)
+    return len([x for x in garland.iterate() if x.brightness == Light.on.value])
 
 
 def second_task(commands: Iterable[str]) -> int:
     """ Решение второй задачи """
 
-    lights = array.array('b', (0 for _ in range(MAX_GRID_SIZE * MAX_GRID_SIZE)))
+    @unique
+    class Light(IntEnum):
+        """ Дискретные значения яркости лампочки """
+        off = -1
+        on = 1
+        toggle = 2
 
-    def apply_instruction(instruction: Instruction) -> None:
-        brightness_changes = {'on': 1, 'off': -1, 'toggle': 2}
-        lights[instruction.offset] = max(0, lights[instruction.offset] + brightness_changes[instruction.action])
+    def calculate_light_brightness(action: Action, light: Light) -> int:
+        """ Расчет яркости лампочки """
+        brightness_change = {
+            action.on: Light.on.value,
+            action.off: Light.off.value,
+            action.toggle: Light.toggle.value,
+        }
+        return max(0, light.brightness + brightness_change[action])
 
+    garland = Garland(MAX_GRID_SIZE)
     for command in _parse_input(commands):
-        for instruction in _to_instructions(command):
-            apply_instruction(instruction)
+        garland.apply(command, calculate_light_brightness)
 
-    return sum(lights)
+    return sum(x.brightness for x in garland.iterate())
