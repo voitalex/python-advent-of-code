@@ -59,14 +59,17 @@ from advent_of_code.common import zip_with
 def first_task(strings: Iterable[str]) -> int:
     """ Решение первой задачи """
 
-    def enough_vowels(string):
+    def enough_vowels(string: str) -> bool:
+        """ Возвращает True если строка содержит не менее трех гласных """
         vowels = frozenset('aeiou')
         return len([char for char in string if char in vowels]) >= 3
 
-    def double_letter(string):
+    def double_letter(string: str) -> bool:
+        """ Возвращает True если строка содержит последовательный повторяющийся символ """
         return any(zip_with(lambda prev, curr: prev == curr, string, string[1::]))
 
-    def no_forbidden_strings(string):
+    def no_forbidden_strings(string: str) -> bool:
+        """ Возвращает True если строка не содержит запрещенные последовательности символов """
         naughty_strings = {('a', 'b'), ('c', 'd'), ('p', 'q'), ('x', 'y')}
         return not any(zip_with(lambda prev, curr: (prev, curr) in naughty_strings, string, string[1::]))
 
@@ -78,9 +81,18 @@ def second_task(strings: Iterable[str]) -> int:
     """ Решение второй задачи """
 
     def two_letters_twice(string: str) -> bool:
+        """
+            Возвращает True если строка содержит два символа подряд минимум
+            дважды без пересечения
+        """
         return re.search(r'([a-z][a-z]).*\1', string) is not None
 
     def same_letter_with_one_between(string: str) -> bool:
+        """
+            Возвращает True если строка содержит минимум один символ,
+            между повторениями которого ровно один другой символ
+        """
+
         def good_enough(left, _, right):
             return left == right
 
