@@ -62,3 +62,9 @@ def y2020_file_loader():
 def y2021_file_loader():
     """ Возвращает входной набор данных для указанной задачи за 2021 год """
     return partial(_file_loader, DATA_DIR / 'y2021')
+
+
+@pytest.fixture()
+def y2022_file_loader():
+    """ Возвращает входной набор данных для указанной задачи за 2022 год """
+    return partial(_file_loader, DATA_DIR / 'y2022')
