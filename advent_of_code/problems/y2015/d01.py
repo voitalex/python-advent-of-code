@@ -67,9 +67,10 @@ def second_task(instructions: Iterable[str]) -> int:
     """ Решение второй задачи """
 
     def below_basement(value: int) -> bool:
+        """ Возвращает True если указанный этаж ниже или равен подвалу """
         return value <= 0
 
-    position: int = 1
+    position = 1
     for index, instruction in enumerate(itertools.chain.from_iterable(instructions), start=1):
         position += _up_or_down(instruction)
         if below_basement(position):
