@@ -1,8 +1,8 @@
 """ Day 05: A Maze of Twisty Trampolines, All Alike """
 
 import pytest
-from advent_of_code.y2017.d05 import first_task, second_task
-from tests.consts import Task
+from advent_of_code.common import Task
+from advent_of_code.problems.y2017.d05 import first_task, second_task
 
 
 @pytest.mark.y2017d05

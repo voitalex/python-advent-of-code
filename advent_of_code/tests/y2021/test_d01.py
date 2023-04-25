@@ -1,8 +1,8 @@
 """ Day 01: Sonar Sweep """
 
 import pytest
-from advent_of_code.y2021.d01 import first_task, second_task
-from tests.consts import Task
+from advent_of_code.common import Task
+from advent_of_code.problems.y2021.d01 import first_task, second_task
 
 
 @pytest.mark.y2021d01

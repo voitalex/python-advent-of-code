@@ -1,9 +1,8 @@
 """ Day 1: No Time for a Taxicab """
 
-
 import pytest
-from tests.consts import Task
-from advent_of_code.y2016.d01 import first_task, second_task
+from advent_of_code.common import Task
+from advent_of_code.problems.y2016.d01 import first_task, second_task
 
 
 @pytest.mark.y2016d01
