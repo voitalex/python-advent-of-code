@@ -2,7 +2,7 @@
 
 import pytest
 from advent_of_code.common import Task
-from advent_of_code.problems.y2015.d07 import first_task
+from advent_of_code.problems.y2015.d07 import first_task, second_task
 
 
 @pytest.mark.y2015d07
@@ -12,25 +12,49 @@ class TestDay07:
     DAY = 7
 
     @pytest.mark.parametrize(
-        "value, expected",
+        'value, expected',
         [
             (
                 [
-                    "123 -> xy",
-                    "456 -> y",
-                    "xy AND y -> a",
-                    "xy OR y -> e",
-                    "xy LSHIFT 2 -> f",
-                    "y RSHIFT 2 -> g",
-                    "NOT x -> h",
-                    "NOT y -> i",
+                    '123 -> xy',
+                    '456 -> y',
+                    'xy AND y -> a',
+                    'xy OR y -> e',
+                    'xy LSHIFT 2 -> f',
+                    'y RSHIFT 2 -> g',
+                    'NOT x -> h',
+                    'NOT y -> i',
                 ],
                 72,
             ),
         ],
     )
     def test_first_task_oneliners(self, value, expected):
-        assert first_task(value) == expected
+        assert first_task(value, 'a') == expected
 
     def test_first_task_from_file(self, y2015_file_loader):
-        assert first_task(y2015_file_loader(self.DAY, Task.first)) == 956
+        assert first_task(y2015_file_loader(self.DAY, Task.first), 'a') == 956
+
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
+            (
+                [
+                    '123 -> xy',
+                    '456 -> y',
+                    'xy AND y -> a',
+                    'xy OR y -> e',
+                    'xy LSHIFT 2 -> f',
+                    'y RSHIFT 2 -> g',
+                    'NOT x -> h',
+                    'NOT y -> i',
+                ],
+                72,
+            ),
+        ],
+    )
+    def test_second_task_oneliners(self, value, expected):
+        assert second_task(value, 'a', 'b') == expected
+
+    def test_second_task_from_file(self, y2015_file_loader):
+        assert second_task(y2015_file_loader(self.DAY, Task.second), 'a', 'b') == 40149

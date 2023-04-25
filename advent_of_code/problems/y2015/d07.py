@@ -112,7 +112,7 @@ class Operand:
         self.type: OperandType = type
         self._value: OperandValue = value
 
-    def value(self, storage: Storage) -> Optional[int]:
+    def value(self, storage: Storage) -> int:
         """ Возвращает фактическое значение операнда """
         if self.type == OperandType.literal:
             return self._value
@@ -188,10 +188,15 @@ class AndCommand(Command):
 
 
 class AssignCommand(Command):
-    """ Обработка  """
+    """ Обработка команды присвоения значения проводнику """
 
     def execute(self, storage: Storage) -> int:
         """ Выполнение команды """
+
+        # Если у проводника уже есть сигнал, то его и возвращаем
+        if (self.result_wire in storage) and (self.first_operand.type == OperandType.literal):
+            return storage[self.result_wire]
+
         return self.first_operand.value(storage)
 
 
@@ -335,14 +340,33 @@ def _parse_input(string: str) -> Command:
     raise ValueError(f'Wrong command: {string}')
 
 
-def first_task(strings: Iterable[str], result_wire: str) -> int:
+def first_task(strings: Iterable[str], result_wire: Wire) -> int:
     """ Решение первой задачи """
 
-    storage = {}
+    storage: Storage = {}
 
     # Формирование списка команд
     # Для дальнейшей обработки необходимо считать все команды
     commands = [_parse_input(string) for string in strings]
+
+    # Имитация прохождения сигнала через контакты
+    return Simulator(storage, commands).run(result_wire=result_wire)
+
+
+def second_task(strings: Iterable[str], result_wire: Wire, attached_wire: Wire) -> int:
+    """ Решение второй задачи """
+
+    storage: Storage = {}
+
+    # Формирование списка команд
+    # Для дальнейшей обработки необходимо считать все команды
+    commands = [_parse_input(string) for string in strings]
+
+    # Имитация прохождения сигнала через контакты
+    result = Simulator(storage, commands).run(result_wire=result_wire)
+
+    # Замена сигнала на проводнике attached_wire
+    storage = {attached_wire: result}
 
     # Имитация прохождения сигнала через контакты
     return Simulator(storage, commands).run(result_wire=result_wire)
