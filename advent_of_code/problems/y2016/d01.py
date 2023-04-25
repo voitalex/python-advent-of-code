@@ -1,4 +1,36 @@
-""" Day 1: No Time for a Taxicab """
+""" Day 1: No Time for a Taxicab
+
+You're airdropped near Easter Bunny Headquarters in a city somewhere. "Near", unfortunately,
+is as close as you can get - the instructions on the Easter Bunny Recruiting Document
+the Elves intercepted start here, and nobody had time to work them out further.
+
+The Document indicates that you should start at the given coordinates (where you just landed)
+and face North. Then, follow the provided sequence: either turn left (L) or right (R) 90 degrees,
+then walk forward the given number of blocks, ending at a new intersection.
+
+There's no time to follow such ridiculous instructions on foot, though, so you take a moment
+and work out the destination. Given that you can only walk on the street grid of the city,
+how far is the shortest path to the destination?
+
+For example:
+
+  * Following R2, L3 leaves you 2 blocks East and 3 blocks North, or 5 blocks away.
+  * R2, R2, R2 leaves you 2 blocks due South of your starting position, which is 2 blocks away.
+  * R5, L5, R5, R3 leaves you 12 blocks away.
+
+How many blocks away is Easter Bunny HQ?
+
+------------------------------------------------------------------------------------------------------------------------
+--- Part Two ---
+
+Then, you notice the instructions continue on the back of the Recruiting Document.
+Easter Bunny HQ is actually at the first location you visit twice.
+
+For example, if your instructions are R8, R4, R4, R8, the first location
+you visit twice is 4 blocks away, due East.
+
+How many blocks away is the first location you visit twice?
+"""
 
 from dataclasses import dataclass
 from enum import Enum, unique
@@ -6,7 +38,7 @@ from typing import Iterable, Iterator, List, Optional
 
 
 @unique
-class Angle(Enum):
+class Direction(Enum):
     """ Направление движения """
     north = 'north'
     east = 'east'
@@ -52,7 +84,7 @@ class Interval:
 
     def __init__(self, start: Point, finish: Point) -> None:
 
-        self.orientation: Orientation = Orientation.horizontal if start.y == finish.y else Orientation.vertical
+        self.orientation = Orientation.horizontal if start.y == finish.y else Orientation.vertical
 
         if self.orientation == Orientation.horizontal:
             self.start, self.finish = (start, finish) if start.x <= finish.x else (finish, start)
@@ -61,55 +93,55 @@ class Interval:
 
     def __str__(self) -> str:
         """ Возвращает строковое представление объекта """
-        return f"start={str(self.start)} finish={str(self.finish)}"
+        return f'start={self.start} finish={self.finish}'
 
 
 @dataclass(frozen=True)
 class Position:
     """ Расположение и ориентация на карте """
     point: Point
-    angle: Angle
-
-
-def _parse_command(value: str) -> Command:
-    """ Возвращает команду для продвижения по городу, сформированную из строкового представления """
-    turn, *blocks = value
-    return Command(turn=Turn(turn), blocks=int(''.join(blocks)))
+    direction: Direction
 
 
 def _generate_commands(strings: Iterable[str]) -> Iterator[Command]:
     """ Генерация команд на лету """
+
+    def _parse(value: str) -> Command:
+        """ Возвращает команду для продвижения по городу, сформированную из строкового представления """
+        turn, *blocks = value
+        return Command(turn=Turn(turn), blocks=int(''.join(blocks)))
+
     for string in strings:
-        yield from map(_parse_command, string.split(', '))
+        yield from map(_parse, string.split(', '))
 
 
 def _move(current: Position, command: Command) -> Position:
     """ Возвращает обновленные координаты положения исходя из текущего положения и команды """
 
-    new_angle: Angle = {
+    direction: Direction = {
         Turn.left: {
-            Angle.north: Angle.west,
-            Angle.east: Angle.north,
-            Angle.south: Angle.east,
-            Angle.west: Angle.south,
+            Direction.north: Direction.west,
+            Direction.east: Direction.north,
+            Direction.south: Direction.east,
+            Direction.west: Direction.south,
         },
         Turn.right: {
-            Angle.north: Angle.east,
-            Angle.east: Angle.south,
-            Angle.south: Angle.west,
-            Angle.west: Angle.north,
+            Direction.north: Direction.east,
+            Direction.east: Direction.south,
+            Direction.south: Direction.west,
+            Direction.west: Direction.north,
         },
-    }[command.turn][current.angle]
+    }[command.turn][current.direction]
 
     dx, dy = {
-        Angle.north: (0, 1),
-        Angle.east: (1, 0),
-        Angle.south: (0, -1),
-        Angle.west: (-1, 0),
-    }[new_angle]
+        Direction.north: (0, 1),
+        Direction.east: (1, 0),
+        Direction.south: (0, -1),
+        Direction.west: (-1, 0),
+    }[direction]
 
     return Position(
-        angle=new_angle,
+        direction=direction,
         point=Point(
             x=current.point.x + dx * command.blocks,
             y=current.point.y + dy * command.blocks,
@@ -118,29 +150,9 @@ def _move(current: Position, command: Command) -> Position:
 
 
 def first_task(strings: Iterable[str]) -> int:
-    """
-    You're airdropped near Easter Bunny Headquarters in a city somewhere. "Near", unfortunately,
-    is as close as you can get - the instructions on the Easter Bunny Recruiting Document
-    the Elves intercepted start here, and nobody had time to work them out further.
+    """ Решение первой задачи """
 
-    The Document indicates that you should start at the given coordinates (where you just landed)
-    and face North. Then, follow the provided sequence: either turn left (L) or right (R) 90 degrees,
-    then walk forward the given number of blocks, ending at a new intersection.
-
-    There's no time to follow such ridiculous instructions on foot, though, so you take a moment
-    and work out the destination. Given that you can only walk on the street grid of the city,
-    how far is the shortest path to the destination?
-
-    For example:
-
-      * Following R2, L3 leaves you 2 blocks East and 3 blocks North, or 5 blocks away.
-      * R2, R2, R2 leaves you 2 blocks due South of your starting position, which is 2 blocks away.
-      * R5, L5, R5, R3 leaves you 12 blocks away.
-
-    How many blocks away is Easter Bunny HQ?
-    """
-
-    current_position = Position(point=Point(x=0, y=0), angle=Angle.north)
+    current_position = Position(point=Point(x=0, y=0), direction=Direction.north)
     for command in _generate_commands(strings):
         current_position = _move(current=current_position, command=command)
 
@@ -148,15 +160,7 @@ def first_task(strings: Iterable[str]) -> int:
 
 
 def second_task(strings: Iterable[str]) -> int:
-    """
-    Then, you notice the instructions continue on the back of the Recruiting Document.
-    Easter Bunny HQ is actually at the first location you visit twice.
-
-    For example, if your instructions are R8, R4, R4, R8, the first location
-    you visit twice is 4 blocks away, due East.
-
-    How many blocks away is the first location you visit twice?
-    """
+    """ Решение второй задачи """
 
     def interval_intersection(first: Interval, second: Interval) -> Optional[Point]:
         """ Возвращает точку пересечения интервалов """
@@ -175,7 +179,7 @@ def second_task(strings: Iterable[str]) -> int:
         return None
 
     prev_intervals: List[Interval] = []
-    current_position = Position(point=Point(x=0, y=0), angle=Angle.north)
+    current_position = Position(point=Point(x=0, y=0), direction=Direction.north)
 
     for command in _generate_commands(strings):
         new_position = _move(current=current_position, command=command)
