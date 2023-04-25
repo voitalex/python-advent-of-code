@@ -123,7 +123,7 @@ class Garland:
         self.garland[self._calc_offset(point)] = value
 
     def apply(self, cmd: Command, calculate_light_brightness: Callable[[Action, Light], int]) -> None:
-        """ Применение команды """
+        """ Применение команды для изменения яркости лампочек """
         for light in self.iterate(cmd.range):
             self._set_light_brightness(
                 point=light.location,
@@ -132,16 +132,11 @@ class Garland:
 
     def iterate(self, range: Optional[Range] = None) -> Iterable[Light]:
         """ Возвращает последовательность лампочек в указанном диапазоне """
-        range = range or self.garland_range
-        for point in range:
+        for point in (range or self.garland_range):
             yield Light(
                 brightness=self._get_light_brightness(point),
                 location=point,
             )
-
-    def count(self, brightness: int) -> int:
-        """ Возвращает количество лампочек с указанной яркостью """
-        return len([x for x in self.garland if x == brightness])
 
 
 def _parse_input(commands: Iterable[str]) -> Iterator[Command]:
