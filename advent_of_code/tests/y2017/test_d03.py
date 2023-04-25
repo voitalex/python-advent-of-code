@@ -1,7 +1,7 @@
 """ Day 03: Spiral Memory """
 
 import pytest
-from advent_of_code.y2017.d03 import first_task, second_task
+from advent_of_code.problems.y2017.d03 import first_task, second_task
 
 
 @pytest.mark.y2017d03
