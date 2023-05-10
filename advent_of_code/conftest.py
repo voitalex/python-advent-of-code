@@ -68,3 +68,11 @@ def y2021_file_loader():
 def y2022_file_loader():
     """ Возвращает входной набор данных для указанной задачи за 2022 год """
     return partial(_file_loader, DATA_DIR / 'y2022')
+
+
+def pytest_configure(config):
+    """ Добавление пользовательских маркеров для тестов """
+
+    for year in range(2015, 2030):
+        for day in range(1, 26):
+            config.addinivalue_line('markers', f'y{year}d{day:02}')
