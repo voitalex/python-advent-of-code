@@ -78,6 +78,3 @@ def second_task(strings: Iterable[str]) -> int:
         return (len(chars) + backslash_count + quote_count + len('\"\"')) - len(chars)
 
     return sum(map(calculate_length_diff, strings))
-
-
-#print(second_task([r'""', r'"abc"', r'"aaa\"aaa"', r'"\x27"']))
